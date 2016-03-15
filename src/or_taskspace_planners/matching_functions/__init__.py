@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+from DiscreteFrechetDistance import DiscreteFrechetDistance
+from DiscreteHausdorffDistance import DiscreteHausdorffDistance
+from DiscreteMidpointDistance import DiscreteMidpointDistance
+from DiscreteOneToOneDistance import DiscreteOneToOneDistance
