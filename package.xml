@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>or_taskspace_planners</name>
+  <version>1.0.1</version>
+  <description>Some task-space planners for OpenRAVE</description>
+  <license>BSD</license>
+  <url type="website">http://github.com/personalrobotics/</url>
+
+  <maintainer email="dbworth@cmu.edu">David Butterworth</maintainer>
+  <author email="dbworth@cmu.edu">David Butterworth</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>boost</depend>
+  <depend>cmake_modules</depend>
+  <depend>eigen</depend>
+  <depend>openrave</depend>
+  <depend>openrave_catkin</depend>
+
+  <exec_depend>python-numpy</exec_depend>
+
+</package>
