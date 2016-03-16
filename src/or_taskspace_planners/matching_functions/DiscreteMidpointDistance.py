@@ -62,12 +62,10 @@ class DiscreteMidpointDistance(object):
             raise ValueError("path1 must have an odd number of rows, "
                              "when initializing "
                              "DiscreteMidpointDistance class." )
-            return
         if (path2_num_rows % 2 == 0):
             raise ValueError("path2 must have an odd number of rows, "
                              "when initializing "
                              "DiscreteMidpointDistance class." )
-            return
 
         self.path1_num_rows = path1_num_rows
         self.path2_num_rows = path2_num_rows
