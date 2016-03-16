@@ -1,31 +1,50 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2016, Carnegie Mellon University
+# All rights reserved.
+# Authors: David Butterworth <dbworth@cmu.edu>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# - Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+# - Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# - Neither the name of Carnegie Mellon University nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+#
+# Recursive Bounded Deviation using Matching Function & Distance Metric
+#
+
 import logging
 import numpy
 import openravepy
 import time
 from prpy.util import SetTrajectoryTags
-
 from prpy.planning.base import (BasePlanner,
                                 PlanningError,
                                 PlanningMethod,
                                 Tags)
-
 import prpy.util
-
 from prpy.planning.exceptions import (CollisionPlanningError,
                                       SelfCollisionPlanningError)
-#                                      ConstraintViolationPlanningError,
-#                                      JointLimitError)
-
 logger = logging.getLogger(__name__)
-
-#
-# Recursive Bounded Deviation using Matching Function & Distance Metric
-#
-# ToDo:
-# russell_bounded_deviation "bounded deviation joint paths"
-#
 
 #---------------------------------------------------------------------#
 
@@ -126,7 +145,7 @@ def CreateWorkspaceTrajectoryByLinearInterpBetweenConfigs(env, robot,
 
     # If q0 and q1 are close together, only q0 will exist in 'samples'
     # and the workspace trajectory will only have one waypoint,
-    # there we manually add q1 as a second waypoint.
+    # therefore we manually add q1 as a second waypoint.
     num_waypoints = traj.GetNumWaypoints()
     if num_waypoints == 1:
         T_goal = prpy.util.GetForwardKinematics(robot, q1)
@@ -198,27 +217,6 @@ def InterpBetweenConfigs(env, robot, start, goal):
                                                    norm_order=2, \
                                                    sampling_func=stg)
     return traj,samples # trajectory, tuple (t,q)
-
-
-"""
-def renderTrajectoryPoses(rviz_tools_class, robot, traj, num_samples=30):
-
-    do blah
-
-    @param instance rviz_tools_class: An instance of the rviz_tools_class.RvizMarkers class
-
-    cspec = traj.GetConfigurationSpecification()
-    dof_indices, _ = cspec.ExtractUsedIndices(robot)
-    #q_resolutions = robot.GetDOFResolutions()[dof_indices]
-    duration = traj.GetDuration()
-    #print 'duration = ', duration
-
-    #num_samples = 30
-    for t in numpy.linspace(0, duration, num_samples):
-
-        T_ee_curr = openravepy.matrixFromPose( traj.Sample(t)[0:7] )
-        rviz_tools_class.publishAxis(T_ee_curr, 0.02, 0.001, None) # pose, axis length, radius, lifetime
-"""
 
 
 def GetWorkspaceTrajectoryWaypointTimes(traj):
@@ -305,43 +303,6 @@ def PublishWorkspaceTrajectoryClosestSegment(rviz_tools, robot, traj,
         waypoint_time_prev = waypoint_time
 
 
-# Between two values of t
-"""
-def PublishWorkspaceTrajectorySegments(rviz_tools, robot, traj, color='red', line_width=0.005, t_min=None, t_max=None):
-    print "in PublishWorkspaceTrajectorySegments()"
-    print "t_min = ", t_min
-    print "t_max = ", t_max
-
-    waypoint_times = GetWorkspaceTrajectoryWaypointTimes(traj)
-
-    epsilon = 0.000001
-
-    num_waypoints = traj.GetNumWaypoints()
-    #T_prev = openravepy.matrixFromPose(traj.Sample(0)[0:7])
-    T_prev = openravepy.matrixFromPose(traj.GetWaypoint(0)[0:7])
-    waypoint_time_prev = 0.0
-    for i in range(1, num_waypoints):
-
-        T = openravepy.matrixFromPose(traj.GetWaypoint(i)[0:7]) # first 7 values are pose
-        #rviz_tools.publishLine(T_prev, T, color, line_width, 0.5) #None) # None = publish forever
-        
-
-        waypoint_time = waypoint_times[i]
-        diff_from_t_min = abs(waypoint_time_prev - t_min)
-        diff_from_t_max = abs(waypoint_time - t_max)
-        print "diff_from_t_min = ", diff_from_t_min
-        print "diff_from_t_max = ", diff_from_t_max
-        #if (diff_from_t_min < epsilon) and (diff_from_t_max < epsilon):
-        if (waypoint_time_prev+epsilon >= t_min) and (waypoint_time-epsilon <= t_max):
-            print "publishing segment ", i
-
-            #T = openravepy.matrixFromPose(traj.GetWaypoint(i)[0:7]) # first 7 values are pose
-            rviz_tools.publishLine(T_prev, T, color, line_width, None) # None = publish forever
-            #T_prev = T
-        T_prev = T
-        waypoint_time_prev = waypoint_time
-"""
-
 def PublishWorkspaceTrajectoryPoses(rviz_tools, robot, traj, n=30, axis_length=0.02, axis_radius=0.001):
     """
     Sample a workspace trajectory n number of times and publish an axes
@@ -405,7 +366,7 @@ class BoundedDeviationPlanner(BasePlanner):
         self.terminate_on_max_recursion = True
         self.rviz_tools_class = None     
 
-        # Statistics
+        # For planning statistics
         self.deepest_recursion = 0
         self.num_collision_checks = 0
 
@@ -470,6 +431,7 @@ class BoundedDeviationPlanner(BasePlanner):
                                 terminate_on_max_recursion=True,
                                 **kwargs):
         """
+        Add docstring
         """
 
         print "in RecursiveSnap: PlanToEndEffectorOffset() \n"
@@ -498,11 +460,6 @@ class BoundedDeviationPlanner(BasePlanner):
             min_pose[0:3, 3] += distance*direction
             traj.Insert(traj.GetNumWaypoints(),
                         openravepy.poseFromMatrix(min_pose))
-            #if max_distance is not None:
-            #    max_pose = numpy.copy(start_pose)
-            #    max_pose[0:3, 3] += max_distance*direction
-            #    traj.Insert(traj.GetNumWaypoints(),
-            #                openravepy.poseFromMatrix(max_pose))
 
         return self.PlanWorkspacePath(robot, traj,
                                       threshold,
@@ -841,9 +798,6 @@ class BoundedDeviationPlanner(BasePlanner):
 
         print "in RecursiveSnap: PlanWorkspacePath()"
         print "num waypoints = ", workspace_path.GetNumWaypoints()
-
-
-        # ToDo: fix AngleBetweenQuaternions() in here
 
         # Compute path-length timing of workspace trajectory
         self.workspace_traj = \
