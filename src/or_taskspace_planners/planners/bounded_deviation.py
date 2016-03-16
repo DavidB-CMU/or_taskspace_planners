@@ -736,9 +736,9 @@ class BoundedDeviationPlanner(BasePlanner):
                                                        ikreturn=False,
                                                        releasegil=True
                                                        )
-                    if q_new == None: 
-                        raise ValueError("There is no IK solution " \
-                                         "for T_ee_new")
+                if q_new == None:
+                    raise ValueError("There is no IK solution " \
+                                     "for T_ee_new")
 
                 # First segment, before couple point:
 
